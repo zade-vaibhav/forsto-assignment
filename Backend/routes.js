@@ -1,22 +1,39 @@
-const express=require("express");
-const {upload}=require("./Controller/uploads")
-const router=express.Router()
+const express = require("express");
+const router = express.Router()
+const multer = require("multer");
+const excelToJson = require('convert-excel-to-json');
 
-const multer=require("multer");
 
-const storage=multer.diskStorage({
-    destination:(req,file,cb)=>{
-       cb(null,"./public/uploads")
+
+
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, "./public/uploads")
     },
-    filename:(req,file,cb)=>{
-        cb(null,file.originalname+`${Date.now()}`)
+    filename: function (req, file, cb) {
+        cb(null, file.originalname)
     }
 })
 
-const fileData=multer({storage:storage})
+const fileData = multer({ storage })
 
 
 
-router.post("/",fileData.single("excel"),upload)
+router.post('/uploadfile', fileData.single("file"), async (req, res) => {
 
-module.exports=router
+    if (req.file?.filename == null || req.file?.filename == "undefined") {
+
+        res.status(400).send("no file")
+
+    } else {
+
+        const path = req.file.path;
+        const result = excelToJson({
+            sourceFile: path
+        });
+        
+    }
+
+})
+
+module.exports = router
